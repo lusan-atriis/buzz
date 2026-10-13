@@ -18,7 +18,14 @@ rows use the same glyph and accessible label. The marker grants no membership,
 mention eligibility, availability or local management capability. This change does
 not change profile navigation, presence, native discovery or invitation/routing.
 
-Regression gates: `otherSetupAgent.test.mjs`, `useKnownAgentPubkeys.test.mjs`,
+The Agents page lists the viewer-owned identities that local inventory lacks in
+a read-only **Your agents on other devices** group (`lib/ownedElsewhereAgents.ts`,
+`ui/OwnedElsewhereAgentsSection.tsx`), through the same predicate and the same
+fail-closed readiness: identity, local inventory and relay directory loaded. Its
+cards open the exact-key profile and carry the shared marker and relay presence;
+they offer no Start, Stop, Edit or Delete, since provenance grants none.
+
+Regression gates: `ownedElsewhereAgents.test.mjs`, `otherSetupAgent.test.mjs`, `useKnownAgentPubkeys.test.mjs`,
 `buildMentionCandidates.test.mjs`, `MentionAutocomplete.test.mjs`, and
 `tests/e2e/cloud-provenance.spec.ts`. Browser evidence is mock-Tauri rendered UI,
 using an already eligible channel member and an existing DM, not a discovery or

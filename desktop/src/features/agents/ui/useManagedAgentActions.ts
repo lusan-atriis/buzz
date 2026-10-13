@@ -20,6 +20,9 @@ import {
   agentPresenceStartBlockReason,
   useAgentAvailabilityLookup,
 } from "../lib/useAgentAvailability";
+import { isAgentDirectoryReady } from "../lib/agentAutocompleteEligibility";
+import { selectOwnedElsewhereAgents } from "../lib/ownedElsewhereAgents";
+import { useIdentityQuery } from "@/shared/api/hooks";
 import { useGlobalAgentConfig } from "@/features/agents/useGlobalAgentConfig";
 import { useChannelsQuery } from "@/features/channels/hooks";
 import { invalidateChannelMembersRosters } from "@/features/channels/rosterFreshness";
@@ -107,8 +110,42 @@ export function useManagedAgentActions() {
     [managedAgents],
   );
 
+  // The viewer's agents this device doesn't manage, listed read-only
+  // (OwnedElsewhereAgentsSection): same provenance predicate as the shared
+  // cloud marker, fail-closed until every directory has loaded.
+  const currentPubkey = useIdentityQuery().data?.pubkey;
+  const localInventoryReady = isAgentDirectoryReady(managedAgentsQuery);
+  const relayDirectoryReady = isAgentDirectoryReady(relayAgentsQuery);
+  const ownedElsewhereAgents = React.useMemo(
+    () =>
+      selectOwnedElsewhereAgents({
+        currentPubkey,
+        localInventoryReady,
+        managedAgents,
+        relayAgents: relayAgentsQuery.data ?? [],
+        relayDirectoryReady,
+      }),
+    [
+      currentPubkey,
+      localInventoryReady,
+      managedAgents,
+      relayAgentsQuery.data,
+      relayDirectoryReady,
+    ],
+  );
+
+  // One presence query for the page's cards: the managed set plus the owned
+  // agents elsewhere (an unqueried identity would read as unknown).
+  const presencePubkeyList = React.useMemo(
+    () => [
+      ...managedPubkeyList,
+      ...ownedElsewhereAgents.map((agent) => agent.pubkey),
+    ],
+    [managedPubkeyList, ownedElsewhereAgents],
+  );
+
   const { query: managedPresenceQuery, getAvailability } =
-    useAgentAvailabilityLookup(managedPubkeyList);
+    useAgentAvailabilityLookup(presencePubkeyList);
 
   function assertStartNotBlockedByPresence(agent: ManagedAgent) {
     const reason = agentPresenceStartBlockReason(
@@ -453,6 +490,7 @@ export function useManagedAgentActions() {
     getAvailability,
     managedAgents,
     managedPubkeys,
+    ownedElsewhereAgents,
     channelIdToName,
     channelsByPubkey,
     isPending,

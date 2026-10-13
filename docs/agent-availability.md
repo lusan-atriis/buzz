@@ -9,8 +9,9 @@ read, failed read, or disconnected relay means unknown, including
 when the cache previously contained Online. Online and Away require presence.
 
 Agents cards and profiles share the existing presence query and live subscription;
-the Agents action owner queries its full managed set once and passes its reader
-to persona/custom/unknown cards. Members owns one full-roster query shared by
+the Agents action owner queries its full managed set, plus the owned agents
+this device does not manage, once and passes its reader to persona/custom/unknown
+and other-device cards. Members owns one full-roster query shared by
 rows, menus and bulk actions. The profile's actions use its existing snapshot,
 and its popover also preserves failed/disconnected reads as unknown. Native
 query errors reject the IPC call rather than fabricating an empty snapshot.
