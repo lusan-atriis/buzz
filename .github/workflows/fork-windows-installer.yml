@@ -12,6 +12,11 @@ name: Fork Windows Installer
 #   - No mesh-llm: release-windows doesn't build it.
 #   - pnpm store restore/save pattern mirrors ci.yml:149-196.
 on:
+  # A push to fork/installer (after a rebase onto a new desktop release) builds
+  # it; workflow_dispatch only lists a workflow that is on the default branch,
+  # and the fork's main stays upstream's.
+  push:
+    branches: [fork/installer]
   workflow_dispatch:
 
 permissions:
